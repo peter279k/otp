@@ -1,11 +1,11 @@
 <?php
 
-session_start(); // using it as storage temporary
+\session_start(); // using it as storage temporary
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use Otp\Otp;
 use Otp\GoogleAuthenticator;
+use Otp\Otp;
 use ParagonIE\ConstantTime\Encoding;
 
 // Getting a secret, either by generating or from storage
@@ -13,12 +13,12 @@ use ParagonIE\ConstantTime\Encoding;
 $secret = 0;
 
 if (isset($_SESSION['otpsecret'])) {
-	$secret = $_SESSION['otpsecret'];
+    $secret = $_SESSION['otpsecret'];
 }
 
-if (strlen($secret) != 16) {
-	$secret = GoogleAuthenticator::generateRandom();
-	$_SESSION['otpsecret'] = $secret;
+if (\strlen($secret) != 16) {
+    $secret = GoogleAuthenticator::generateRandom();
+    $_SESSION['otpsecret'] = $secret;
 }
 
 // The secret is now an easy stored Base32 string.
@@ -72,26 +72,25 @@ Output:<br />
 <?php
 
 if (isset($_POST['otpkey'])) {
-	// Sanatizing, this should take care of it
-	$key = preg_replace('/[^0-9]/', '', $_POST['otpkey']);
-	
-	// Standard is 6 for keys, but can be changed with setDigits on $otp
-	if (strlen($key) == 6) {
-		// Remember that the secret is a base32 string that needs decoding
-		// to use it here!
-		if ($otp->checkTotp(Encoding::base32DecodeUpper($secret), $key)) {
-			echo 'Key correct!';
-			// Add here something that makes note of this key and will not allow
-			// the use of it, for this user for the next 2 minutes. This way you
-			// prevent a replay attack. Otherwise your OTP is missing one of the
-			// key features it can bring in security to your application!
-		} else {
-			echo 'Wrong key!';
-		}
-		
-	} else {
-		echo 'Key not the correct size';
-	}
+    // Sanatizing, this should take care of it
+    $key = \preg_replace('/[^0-9]/', '', $_POST['otpkey']);
+
+    // Standard is 6 for keys, but can be changed with setDigits on $otp
+    if (\strlen($key) == 6) {
+        // Remember that the secret is a base32 string that needs decoding
+        // to use it here!
+        if ($otp->checkTotp(Encoding::base32DecodeUpper($secret), $key)) {
+            echo 'Key correct!';
+            // Add here something that makes note of this key and will not allow
+            // the use of it, for this user for the next 2 minutes. This way you
+            // prevent a replay attack. Otherwise your OTP is missing one of the
+            // key features it can bring in security to your application!
+        } else {
+            echo 'Wrong key!';
+        }
+    } else {
+        echo 'Key not the correct size';
+    }
 }
 
 ?>

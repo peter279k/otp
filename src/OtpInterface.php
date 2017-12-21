@@ -3,7 +3,7 @@
 namespace Otp;
 
 /**
- * Interface for HOTP and TOTP
+ * Interface for HOTP and TOTP.
  *
  * HMAC-Based One-time Password(HOTP) algorithm specified in RFC 4226
  * @link https://tools.ietf.org/html/rfc4226
@@ -16,30 +16,29 @@ namespace Otp;
  * @license MIT License see LICENSE file
  */
 
-interface OtpInterface
-{
+interface OtpInterface {
     /**
-     * Returns OTP using the HOTP algorithm (counter based)
+     * Returns OTP using the HOTP algorithm (counter based).
      *
      * @param string  $secret  Base32 Secret String
      * @param integer $counter Counter
      *
      * @return string One Time Password
      */
-    function hotp($secret, $counter);
+    public function hotp($secret, $counter);
 
     /**
-     * Returns OTP using the TOTP algorithm (time based)
+     * Returns OTP using the TOTP algorithm (time based).
      *
      * @param string  $secret      Base32 Secret String
      * @param integer $timecounter Optional: Uses current time if null
      *
      * @return string One Time Password
      */
-    function totp($secret, $timecounter = null);
+    public function totp($secret, $timecounter = null);
 
     /**
-     * Checks Hotp against a key
+     * Checks Hotp against a key.
      *
      * This is a helper function, but is here to ensure the Totp can be checked
      * in the same manner.
@@ -50,10 +49,10 @@ interface OtpInterface
      *
      * @return boolean True if key is correct
      */
-    function checkHotp($secret, $counter, $key);
+    public function checkHotp($secret, $counter, $key);
 
     /**
-     * Checks Hotp against a key for a provided counter window
+     * Checks Hotp against a key for a provided counter window.
      *
      * @param string  $secret        Base32 Secret String
      * @param integer $counter       Counter
@@ -62,10 +61,10 @@ interface OtpInterface
      *
      * @return int|boolean the counter if key is correct else false
      */
-    function checkHotpResync($secret, $counter, $key, $counterwindow = 2);
+    public function checkHotpResync($secret, $counter, $key, $counterwindow = 2);
 
     /**
-     * Checks Totp agains a key
+     * Checks Totp agains a key.
      *
      * @param string  $secret    Base32 Secret String
      * @param integer $key       User supplied key
@@ -73,5 +72,5 @@ interface OtpInterface
      *
      * @return boolean True if key is correct within time drift
      */
-    function checkTotp($secret, $key, $timedrift = 1);
+    public function checkTotp($secret, $key, $timedrift = 1);
 }
