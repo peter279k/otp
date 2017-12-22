@@ -22,6 +22,7 @@ before_script:
 before_script:
     - composer install --no-interaction
     - mkdir -p build/logs
+    - composer fix-syntax
 
 script:
     - vendor/bin/phpunit --coverage-text

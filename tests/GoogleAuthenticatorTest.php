@@ -72,9 +72,108 @@ class GoogleAuthenticatorTest extends TestCase {
     }
 
     /**
-     * Tests getKeyUri Exceptions.
+     * Tests getKeyUri invalid type.
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Type has to be of allowed types list
      */
-    //public function
+    public function testGetKeyUriWithInvalidType() {
+        // throw the invalid type exception message
+        GoogleAuthenticator::getKeyUri('error_type', 'user@host.com', 'secret');
+    }
+
+    /**
+     * Tests getKeyUri empty label.
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Label has to be one or more printable characters
+     */
+    public function testGetKeyUriWithEmptyLabel() {
+        // throw the empty label exception message
+        GoogleAuthenticator::getKeyUri('hotp', '', 'secret');
+    }
+
+    /**
+     * Tests getKeyUri label contains invalid characters.
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Account name contains illegal colon characters
+     */
+    public function testGetKeyUriWithLabelContainsInvalidCharatcer() {
+        // throw the label contains invalid characters exception message
+        GoogleAuthenticator::getKeyUri('hotp', 'illegal:char1:char2:char3:char4', 'secret');
+    }
+
+    /**
+     * Tests getKeyUri empty secret.
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage No secret present
+     */
+    public function testGetKeyUriWithEmptySecret() {
+        // throw the empty secret exception message
+        GoogleAuthenticator::getKeyUri('hotp', 'user@host.com', '');
+    }
+
+    /**
+     * Tests getKeyUri hotp doesn't have the counter.
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Counter required for hotp
+     */
+    public function testGetKeyUriWithHotpHasNullCounter() {
+        // throw the hotp having null counter exception message
+        GoogleAuthenticator::getKeyUri('hotp', 'user@host.com', 'secret');
+    }
+
+    /**
+     * Tests getKeyUri options specifies other algorithm.
+     */
+    public function testGetKeyUriWithOptionHasOtherAlgorithm() {
+        // the options have the algorithm key.
+        $this->assertEquals(
+            'otpauth://hotp/user@host.com?secret=secret&counter=123&algorithm=SHA2',
+            GoogleAuthenticator::getKeyUri('hotp', 'user@host.com', 'secret', 123, ['algorithm' => 'SHA2'])
+        );
+    }
+
+    /**
+     * Tests getKeyUri customized digits is valid.
+     */
+    public function testGetKeyUriWithOptionHasValidDigits() {
+        // the customized digits is valid.
+        $this->assertEquals(
+            'otpauth://hotp/user@host.com?secret=secret&counter=123&digits=8',
+            GoogleAuthenticator::getKeyUri('hotp', 'user@host.com', 'secret', 123, ['digits' => 8])
+        );
+    }
+
+    /**
+     * Tests getKeyUri customized digits is invalid.
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Digits can only have the values 6 or 8, 100 given
+     */
+    public function testGetKeyUriWithOptionHasInvalidDigits() {
+        // the customized digits is invalid.
+        GoogleAuthenticator::getKeyUri('hotp', 'user@host.com', 'secret', 123, ['digits' => 100]);
+    }
+
+    /**
+     * Tests getKeyUri totp type has the customized period.
+     */
+    public function testGetKeyUriWithOptionHasPeriod() {
+        // the customized period is set in totp type.
+        $this->assertEquals(
+            'otpauth://totp/user@host.com?secret=secret&period=20',
+            GoogleAuthenticator::getKeyUri('totp', 'user@host.com', 'secret', null, ['period' => 20])
+        );
+    }
+
+    /**
+     * Tests getKeyUri the freeotp type option is set the image.
+     */
+    public function testGetKeyUriWithOptionHasImage() {
+        // accept the image option in freeotp type.
+        $this->assertEquals(
+            'otpauth://totp/user@host.com?secret=secret&image=the_image',
+            GoogleAuthenticator::getKeyUri('totp', 'user@host.com', 'secret', null, ['image' => 'the_image'])
+        );
+    }
 
     /**
      * Tests generateRandom.

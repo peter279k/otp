@@ -157,6 +157,53 @@ class OtpTest extends TestCase {
     }
 
     /**
+     * Tests $this->Otp->totp.
+     */
+    public function testTotp() {
+        $secret = $this->secret;
+
+        $this->assertEquals('755224', $this->Otp->totp($secret, \floor(8/30)), "sha 1 with 8");
+        $this->assertInternalType('string', $this->Otp->totp($secret), "sha 1 with random time counter");
+    }
+
+    /**
+     * Tests $this->Otp->checkHotp.
+     */
+    public function testCheckHotp() {
+        $secret = $this->secret;
+
+        $this->assertTrue($this->Otp->checkHotp($secret, \floor(8/30), '755224'), "sha 1 with 8");
+    }
+
+    /**
+     * Tests $this->Otp->checkTotp with non-worked.
+     */
+    public function testCheckTotpWithNoneWorked() {
+        $secret = $this->secret;
+
+        $this->assertFalse($this->Otp->checkTotp($secret, '755224'));
+    }
+
+    /**
+     * Tests $this->Otp->checkTotp with time drift is zero.
+     */
+    public function testCheckTotpWithTimeDriftZero() {
+        $secret = $this->secret;
+
+        $this->assertFalse($this->Otp->checkTotp($secret, '755224', 0));
+    }
+
+    /**
+     * Tests $this->Otp->checkTotp with time drift is invalid.
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Invalid timedrift supplied
+     */
+    public function testCheckTotpWithInvalidTimeDrift() {
+        $secret = $this->secret;
+        $this->Otp->checkTotp($secret, '755224', -1);
+    }
+
+    /**
      * @dataProvider invalidCounterValues
      * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage Invalid counter supplied
@@ -218,5 +265,76 @@ class OtpTest extends TestCase {
      */
     public function testHotpResyncInvalidCounterWindow($counterwindow) {
         $this->Otp->checkHotpResync($this->secret, 0, '755224', $counterwindow);
+    }
+
+    /**
+     * Tests Otp->getAlgorithm() with getting the algorithm name.
+     */
+    public function testGetAlgorithm() {
+        $this->assertEquals('sha1', $this->Otp->getAlgorithm());
+    }
+
+    /**
+     * Tests Otp->setPeriod() with setting period.
+     */
+    public function testSetPeriod() {
+        $this->assertInstanceOf('Otp\Otp', $this->Otp->setPeriod(100));
+    }
+
+    /**
+     * Tests Otp->getPeriod() with getting period.
+     */
+    public function testGetPeriod() {
+        $this->assertEquals(30, $this->Otp->getPeriod());
+    }
+
+    /**
+     * Tests Otp->setPeriod() with setting invalid period.
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Period must be an integer
+     */
+    public function testSetPeriodWithInvalid() {
+        $this->Otp->setPeriod(0.1);
+    }
+
+    /**
+     * Tests Otp->setDigits() with setting invalid digits.
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Digits must be 6 or 8
+     */
+    public function testSetDigitsWithInvalid() {
+        $this->Otp->setDigits(10);
+    }
+
+    /**
+     * Tests Otp->getDigits() with getting digits.
+     */
+    public function testGetDigits() {
+        $this->assertEquals(6, $this->Otp->getDigits());
+    }
+
+    /**
+     * Tests Otp->setTotpOffset() with setting totp offset.
+     */
+    public function testSetTotpOffset() {
+        $this->assertInstanceOf('Otp\Otp', $this->Otp->setTotpOffset(100));
+    }
+
+    /**
+     * Tests Otp->getTotpOffset() with getting totp offset.
+     */
+    public function testGetTotpOffset() {
+        $this->Otp->setTotpOffset(100);
+
+        $this->assertEquals(100, $this->Otp->getTotpOffset());
+    }
+
+    /**
+     * Tests Otp->setTotpOffset() with setting invalid totp offset.
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Offset must be an integer
+     */
+    public function testSetTotpOffsetWithInvalid() {
+        $this->Otp->setTotpOffset(0.1);
     }
 }
